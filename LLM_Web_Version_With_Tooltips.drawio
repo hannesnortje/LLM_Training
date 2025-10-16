@@ -1,0 +1,183 @@
+<mxfile host="65bd71144e">
+    <diagram name="LLM Training Feasibility - Web Version" id="llm-web-version">
+        <mxGraphModel dx="1342" dy="711" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <object label="🧠 LLM Training Feasibility on Apple M1 (32GB)" id="title">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="40" y="20" width="1080" height="60" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="summary" value="⚠️ CONCLUSION: Apple M1 (32GB) cannot feasibly perform full-scale LLM training&lt;br&gt;Even 1-3B parameter models would take YEARS to train&lt;br&gt;Best used for: Data prep, tokenizer training, tiny pilots, LoRA/QLoRA fine-tuning" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="100" width="1080" height="80" as="geometry"/>
+                </mxCell>
+                <object label="📊 Training Time by Model Size (Chinchilla Formula)" tooltip="The Chinchilla Formula is a research finding from DeepMind (2022) that determines the optimal compute budget for training language models. It states: Total FLOPs ≈ 6 × (parameters) × (tokens). This means for optimal performance, you need about 6 FLOPs per parameter per token. The formula helps determine how much compute and data you need for different model sizes." id="model-size-title">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                        <mxGeometry x="40" y="200" width="520" height="40" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="7B Parameters&#xa;140B Tokens&#xa;37.3 years (optimistic)&#xa;100-370 years (realistic)" tooltip="7B parameter model (similar to Llama 2-7B) requires 140B tokens for Chinchilla-optimal training. Uses 5.88×10²¹ FLOPs total. Even with optimistic 5 TFLOPs/s throughput, this takes 37+ years on M1." id="model-7b">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="30" y="260" width="120" height="90" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="model-3b" value="3B Parameters&#xa;70B Tokens&#xa;8.0 years (optimistic)&#xa;20-80 years (realistic)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1" tooltip="3B parameter model requires 70B tokens for optimal training. Uses 1.26×10²¹ FLOPs total. Still impractical on M1, taking 8+ years even with optimistic assumptions.">
+                    <mxGeometry x="170" y="260" width="120" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="model-1.5b" value="1.5B Parameters&#xa;35B Tokens&#xa;2.0 years (optimistic)&#xa;5-20 years (realistic)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="260" width="120" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="model-150m" value="150M Parameters&#xa;5B Tokens&#xa;104 days (optimistic)&#xa;6 months - 2 years (realistic)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ccffcc;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1" tooltip="150M parameter model is the smallest size that might be feasible on M1. Uses 4.5×10¹⁹ FLOPs total. Takes 104 days optimistically, but realistic utilization makes it 6 months to 2 years.">
+                    <mxGeometry x="450" y="260" width="120" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="hardware-title" value="⚡ Hardware Comparison - Time to Train 7B Model" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="200" width="520" height="40" as="geometry"/>
+                </mxCell>
+                <object label="Apple M1 (32GB)&#xa;0.5-5 TFLOPs/s&#xa;37-370 years&#xa;~30W" tooltip="Apple M1 Pro/Max with 32GB unified memory. Peak theoretical throughput is 5 TFLOPs/s, but realistic sustained performance is 0.5-2 TFLOPs/s due to thermal throttling and memory bandwidth limits." id="m1-hardware">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="626" y="260" width="100" height="90" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="1× RTX 4090&#xa;~50 TFLOPs/s&#xa;≈ 3.7 years&#xa;~350W" tooltip="Single RTX 4090 GPU with 24GB VRAM. Consumer-grade hardware that can achieve ~50 TFLOPs/s for training. Still takes 3.7 years to train a 7B model (vs 37+ years on M1). Power consumption is ~350W. This represents the minimum viable hardware for serious LLM training - still impractical for most users due to the multi-year timeline, but 10× faster than M1. Requires significant cooling and power supply considerations." id="rtx4090-hardware">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="746" y="260" width="100" height="90" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="8× A100 (80GB)&#xa;~1 PFLOP/s&#xa;≈ 68 days&#xa;~2kW" tooltip="8× NVIDIA A100 GPUs with 80GB VRAM each. Professional data center hardware achieving ~1 PFLOP/s (1,000 TFLOPs/s) sustained throughput. Can train a 7B model in about 68 days - a massive improvement over single GPU setups. Power consumption is ~2kW total. This represents serious enterprise/research infrastructure. Cost is $100K+ for the hardware alone, plus data center costs. This is what most AI companies use for training large models." id="a100-hardware">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="866" y="260" width="100" height="90" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="32× H100 (80GB)&#xa;~8 PFLOPs/s&#xa;≈ 8-9 days&#xa;~8kW" tooltip="32× NVIDIA H100 GPUs with 80GB VRAM each. State-of-the-art enterprise data center setup achieving ~8 PFLOPs/s (8,000 TFLOPs/s) sustained throughput. Can train a 7B model in just 8-9 days - what takes 37 years on M1 finishes in under 10 days here. Power consumption is ~8kW total. This represents the cutting edge of AI training infrastructure used by major AI companies. Cost is $500K+ for hardware alone, plus massive data center and operational costs. This is what OpenAI, Google, and other AI giants use for training their largest models." id="h100-hardware">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="986" y="260" width="100" height="90" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="limitations-title" value="🚫 Why M1 (32GB) Cannot Handle Full LLM Training" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="360" width="520" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="compute-limit" value="Compute Power&#xa;Need: ≥50 TFLOPs/s&#xa;M1: 5 TFLOPs/s peak&#xa;Result: 100× too slow" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="69" y="420" width="100" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="memory-limit" value="Memory (VRAM)&#xa;Need: 50-100GB&#xa;M1: 32GB unified&#xa;Result: Severe paging" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="189" y="420" width="100" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="parallelism-limit" value="Parallelism&#xa;Need: Multi-GPU&#xa;M1: Single GPU&#xa;Result: No scaling" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="309" y="420" width="100" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="io-limit" value="I/O Throughput&#xa;Need: 10-50 GB/s&#xa;M1: ~3-7 GB/s&#xa;Result: Bottleneck" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffcccc;strokeColor=#d79b00;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="429" y="420" width="100" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="can-do-title" value="✅ What M1 (32GB) CAN Do Effectively" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="360" width="520" height="40" as="geometry"/>
+                </mxCell>
+                <object label="Data Curation &amp; Tokenizer Training&#xa;✅ Excellent&#xa;Hours - Days" tooltip="Data preparation is where M1 truly excels. Tasks include: 1) Data collection and cleaning (removing duplicates, filtering quality, deduplication), 2) Text preprocessing and normalization (encoding, formatting), 3) Training custom tokenizers (BPE/WordPiece) on domain-specific data, 4) Creating train/validation/test splits, 5) Data augmentation and quality filtering. M1&#39;s 32GB unified memory handles large datasets efficiently, and the CPU cores excel at text processing. This phase is essential for good model performance and typically takes hours to days depending on dataset size." id="data-prep">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="632" y="420" width="100" height="110" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="Tiny Model (≤150M params)&#xa;✅ Feasible&#xa;Days - Weeks" tooltip="Training small models (≤150M parameters) is actually feasible on M1. Examples include: 1) GPT-2 Small (117M params) - can be trained in days, 2) DistilBERT (66M params) - good for text classification, 3) TinyBERT (14M params) - ultra-efficient for specific tasks. These models use 4.5×10¹⁹ FLOPs total, taking 104 days optimistically but 6 months to 2 years realistically. While not competitive with large models, they&#39;re perfect for: proof-of-concepts, domain-specific tasks, educational purposes, and applications where size/speed matter more than capability." id="tiny-model">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="752" y="420" width="100" height="110" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="LoRA/QLoRA Fine-tune&#xa;⚙️ Limited&#xa;Hours - Days" tooltip="LoRA (Low-Rank Adaptation) and QLoRA fine-tuning are feasible on M1 with limitations. M1 can handle: 1) LoRA fine-tuning of 7B models (takes hours to days), 2) QLoRA (quantized LoRA) for memory efficiency, 3) Instruction tuning and task-specific adaptation, 4) Multiple adapter training for different use cases. Limitations include: larger models (13B+) may be too slow, full fine-tuning is impractical, and training time scales significantly with model size. This is cost-effective for creating specialized variants of existing models without retraining everything from scratch." id="lora-finetune">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="872" y="420" width="100" height="110" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="Inference/Demo&#xa;✅ Excellent&#xa;4-bit quantized" tooltip="Inference is where M1 truly shines for LLM deployment. Capabilities include: 1) Running 7B models with 4-bit quantization (fits in 32GB RAM), 2) Fast inference speeds (10-50 tokens/second), 3) Private, local deployment with no data leaving your machine, 4) Integration with applications via APIs (Ollama, llama.cpp), 5) Cost-effective for demos, testing, and production use. M1 can run models up to 13B parameters with quantization. This enables rapid iteration, privacy-sensitive applications, and cost-effective deployment without cloud dependencies. Perfect for personal AI assistants, local chatbots, and development/testing." id="inference">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="992" y="420" width="100" height="110" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="pipeline-title" value="🚀 Recommended Practical Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="744" width="1080" height="40" as="geometry"/>
+                </mxCell>
+                <object label="Phase 1: Data &amp; Tokenizer&#xa;Clean and curate data&#xa;✅ Apple M1 (32GB)&#xa;Outcome: Dataset + tokenizer" tooltip="Phase 1 focuses on data preparation, which is perfect for M1. Tasks include: 1) Data collection and cleaning (removing duplicates, filtering quality), 2) Text preprocessing and normalization, 3) Training a custom tokenizer (BPE/WordPiece) on your domain-specific data, 4) Creating train/validation splits. M1 excels here because it&#39;s CPU-intensive work with large memory requirements (32GB helps with large datasets). This phase typically takes hours to days and is essential for good model performance." id="phase1">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="123" y="804" width="200" height="100" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow1" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="phase1" target="phase2" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="343" y="854" as="sourcePoint"/>
+                        <mxPoint x="393" y="804" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Phase 2: Training&#xa;Continue pretraining/from-scratch&#xa;💪 4× A100 or 8× 4090&#xa;Outcome: New base model" tooltip="Phase 2 is the heavy computational work that requires professional GPU hardware. Options include: 1) Continue pretraining from existing models (like Llama) on your domain data, 2) Train from scratch using your curated dataset, 3) Use cloud services (AWS/GCP/Azure) or rent GPU clusters. 4× A100 (80GB) or 8× RTX 4090 can train 7B models in weeks to months. This phase requires significant compute budget ($10K-100K+) and expertise in distributed training. M1 cannot handle this phase due to insufficient compute power and memory bandwidth." id="phase2">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="363" y="804" width="200" height="100" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow2" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="phase2" target="phase3" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="583" y="854" as="sourcePoint"/>
+                        <mxPoint x="633" y="804" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Phase 3: Fine-tuning&#xa;LoRA/Instruction tuning&#xa;⚙️ M1 or 1× 4090&#xa;Outcome: Domain-specific LLM" tooltip="Phase 3 adapts the base model to specific tasks using efficient fine-tuning methods. Techniques include: 1) LoRA (Low-Rank Adaptation) - freezes base model, trains small adapter layers, 2) QLoRA - quantized LoRA for memory efficiency, 3) Instruction tuning - trains model to follow specific formats, 4) RLHF (Reinforcement Learning from Human Feedback). M1 can handle LoRA fine-tuning of 7B models (takes hours to days), but larger models or full fine-tuning need GPU. This phase is cost-effective and can be done locally on M1 for smaller models." id="phase3">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="603" y="804" width="200" height="100" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow3" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="phase3" target="phase4" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="823" y="854" as="sourcePoint"/>
+                        <mxPoint x="873" y="804" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Phase 4: Inference&#xa;Local testing/demo&#xa;✅ M1 (4-bit quantized)&#xa;Outcome: Fast private inference" tooltip="Phase 4 is where M1 truly shines for LLM deployment. Capabilities include: 1) Running 7B models with 4-bit quantization (fits in 32GB RAM), 2) Fast inference speeds (10-50 tokens/second), 3) Private, local deployment with no data leaving your machine, 4) Integration with applications via APIs (Ollama, llama.cpp), 5) Cost-effective for demos, testing, and production use. M1 can run models up to 13B parameters with quantization. This phase enables rapid iteration, privacy-sensitive applications, and cost-effective deployment without cloud dependencies." id="phase4">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=5;" parent="1" vertex="1">
+                        <mxGeometry x="843" y="804" width="200" height="100" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="math-title" value="🧮 Math Verification: 37-Year Estimate" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="544" width="1080" height="40" as="geometry"/>
+                </mxCell>
+                <object label="Given: 7B parameters, 140B tokens&#xa;FLOPs = 6 × 7×10⁹ × 1.4×10¹¹ = 5.88×10²¹&#xa;Time = 5.88×10²¹ ÷ 5×10¹² = 1.176×10⁹ seconds&#xa;Years = 1.176×10⁹ ÷ (365.25×24×3600) ≈ 37.3 years&#xa;&#xa;⚠️ Real utilization (≤40%) pushes this closer to 100 years" tooltip="FLOP stands for &#39;Floating Point Operation&#39; - a single mathematical calculation (like addition, multiplication) involving decimal numbers. Modern AI training requires trillions of these operations. This calculation shows: 1) Using Chinchilla formula (6 × params × tokens) = 5.88×10²¹ FLOPs total, 2) At 5 TFLOPs/s (5 trillion FLOPs per second) = 37.3 years, 3) Real-world efficiency is much lower due to memory bandwidth, thermal throttling, and software overhead, making it closer to 100 years." id="math-formula">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="60" y="604" width="1040" height="120" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="explanation-title" value="📚 Key Concepts Explained" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="920" width="1080" height="40" as="geometry"/>
+                </mxCell>
+                <object label="🔧 LoRA (Low-Rank Adaptation) Explained&#xa;&#xa;Training from Scratch vs. LoRA:&#xa;• Training from Scratch (Phase 2): Creates a completely new model from random weights using your dataset&#xa;• LoRA Fine-tuning (Phase 3): Adapts an existing pre-trained model with small adapter layers&#xa;&#xa;How LoRA Works:&#xa;• Freezes the original model weights (unchanged)&#xa;• Adds tiny trainable matrices (~0.1% of model size)&#xa;• Modifies behavior without retraining everything&#xa;&#xa;Why Use LoRA After Training from Scratch?&#xa;• Specialize further for specific tasks&#xa;• Instruction tuning for specific formats&#xa;• Create multiple variants for different purposes&#xa;• Domain adaptation for your use case&#xa;&#xa;Integration: LoRA adapters are loaded alongside base model during inference" tooltip="LoRA is an efficient fine-tuning technique that allows you to adapt large language models without retraining the entire model. It works by adding small, trainable adapter layers to an existing model while keeping the original weights frozen. This makes it much faster and cheaper than full fine-tuning, and allows you to create multiple specialized versions of the same base model." id="lora-explanation">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="60" y="980" width="500" height="330" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="🚀 Inference on M1 Explained&#xa;&#xa;Why M1 Excels at Inference:&#xa;• Unified memory architecture (32GB shared between CPU/GPU)&#xa;• Efficient neural engine for ML workloads&#xa;• Low power consumption for continuous operation&#xa;• No cloud costs or data privacy concerns&#xa;&#xa;Quantization Benefits:&#xa;• 4-bit quantization reduces model size by 75%&#xa;• 7B model fits in 32GB RAM (vs 14GB+ normally)&#xa;• Minimal quality loss with significant speed gains&#xa;• Enables running larger models locally&#xa;&#xa;Performance Expectations:&#xa;• 7B models: 10-50 tokens/second&#xa;• 13B models: 5-25 tokens/second (with quantization)&#xa;• Real-time conversation possible&#xa;• Perfect for demos, testing, and production use&#xa;&#xa;Integration: Works with Ollama, llama.cpp, and custom applications" tooltip="Inference is simply using a trained AI model to generate responses. Think of it like this: Training is like teaching a student (the model learns from data), while Inference is like taking an exam (the model answers questions). When you chat with ChatGPT, you&#39;re doing inference - the model takes your input and generates a response. On M1, inference means running the AI model locally on your Mac to get instant, private responses without sending data to the cloud. It&#39;s like having your own personal AI assistant that works offline." id="inference-explanation">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="580" y="980" width="500" height="330" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="dataset-analysis-title" value="📊 Dataset Size Analysis &amp; Transformation Requirements" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="1330" width="1080" height="40" as="geometry"/>
+                </mxCell>
+                <object label="📈 Dataset Size Requirements by Model&#xa;&#xa;150M Model:&#xa;• Total needed: 3B tokens (4.3 GB, ~2M code files)&#xa;• Your data needed: 1.5B tokens (2.1 GB, ~1M files)&#xa;• Framework impact: 50% of dataset&#xa;&#xa;1.3B Model:&#xa;• Total needed: 26B tokens (37 GB, ~17M code files)&#xa;• Your data needed: 7.8B tokens (11 GB, ~5M files)&#xa;• Framework impact: 30% of dataset&#xa;&#xa;3B Model:&#xa;• Total needed: 60B tokens (86 GB, ~40M code files)&#xa;• Your data needed: 18B tokens (26 GB, ~12M files)&#xa;• Framework impact: 30% of dataset&#xa;&#xa;7B Model:&#xa;• Total needed: 140B tokens (200 GB, ~93M code files)&#xa;• Your data needed: 42B tokens (60 GB, ~28M files)&#xa;• Framework impact: 30% of dataset" tooltip="This shows how much of YOUR data you need to create meaningful framework behavior. The key insight: you need 30-50% of the total dataset to be your framework data for significant impact. For a 7B model, that means 60GB of your framework data (28 million code files). The numbers are based on research showing that 30%+ of training data needs to follow specific patterns for the model to reliably exhibit those patterns. Critical factors: 1) Quality over quantity - well-structured framework data matters more than raw volume, 2) Pattern consistency - your data must follow consistent framework patterns, 3) Coverage breadth - need examples across different use cases and complexity levels, 4) Data diversity - include various scenarios, edge cases, and real-world applications." id="dataset-requirements">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="60" y="1390" width="500" height="330" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="🎯 Framework Data Requirements for Meaningful Impact&#xa;&#xa;Research-Based Thresholds:&#xa;&#xa;150M Model:&#xa;• Need: 1.5B tokens (2.1 GB, ~1M files)&#xa;• Framework behavior: 90-95%&#xa;• Perfect for prototyping&#xa;&#xa;1.3B Model:&#xa;• Need: 7.8B tokens (11 GB, ~5M files)&#xa;• Framework behavior: 80-85%&#xa;• Strong framework alignment&#xa;&#xa;3B Model:&#xa;• Need: 18B tokens (26 GB, ~12M files)&#xa;• Framework behavior: 75-80%&#xa;• Good framework alignment&#xa;&#xa;7B Model:&#xa;• Need: 42B tokens (60 GB, ~28M files)&#xa;• Framework behavior: 70-75%&#xa;• Solid framework alignment" tooltip="This shows the minimum amount of YOUR framework data needed for meaningful behavior change. Based on research: 30%+ of training data must follow specific patterns for reliable model behavior. The framework behavior percentage indicates how consistently the model will follow your patterns vs. generic behavior. Key insights: 1) 30% threshold - below this, models show mostly generic behavior, 2) Quality matters - well-structured framework examples are more important than raw volume, 3) Pattern consistency - your data must demonstrate consistent framework usage, 4) Coverage breadth - need examples across different complexity levels and use cases, 5) Real-world scenarios - include edge cases, error handling, and practical applications." id="transformation-impact">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="580" y="1390" width="500" height="330" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="💾 Your Framework Data Collection Requirements&#xa;&#xa;What You Need to Collect:&#xa;&#xa;150M Model:&#xa;• 2.1 GB of framework code (1M files)&#xa;• Focus: Core patterns, examples, docs&#xa;• Timeline: 2-4 weeks collection&#xa;&#xa;1.3B Model:&#xa;• 11 GB of framework code (5M files)&#xa;• Focus: Comprehensive examples, edge cases&#xa;• Timeline: 2-3 months collection&#xa;&#xa;3B Model:&#xa;• 26 GB of framework code (12M files)&#xa;• Focus: Full ecosystem, real projects&#xa;• Timeline: 4-6 months collection&#xa;&#xa;7B Model:&#xa;• 60 GB of framework code (28M files)&#xa;• Focus: Complete framework universe&#xa;• Timeline: 6-12 months collection" tooltip="This shows what YOU need to collect to create meaningful framework behavior. The key insight: you need substantial amounts of your own framework data, not just transformed public data. Collection includes: 1) Source code - all your framework implementations, 2) Documentation - comprehensive guides and examples, 3) Test cases - showing proper usage patterns, 4) Real projects - actual applications using your framework, 5) Edge cases - error handling and complex scenarios. Timeline estimates assume dedicated effort to systematically collect and organize your framework ecosystem. Quality matters more than quantity - well-structured examples are more valuable than raw code dumps." id="storage-processing">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="60" y="1750" width="500" height="340" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="⚠️ Practical Reality Check&#xa;&#xa;The Bottom Line:&#xa;&#xa;150M Model:&#xa;• Need: 2.1 GB of your framework data&#xa;• Feasible: Yes, with focused collection&#xa;• Result: 90-95% framework behavior&#xa;&#xa;1.3B+ Models:&#xa;• Need: 11-60 GB of your framework data&#xa;• Challenge: Massive data collection effort&#xa;• Result: 70-85% framework behavior&#xa;&#xa;Key Questions:&#xa;• Do you have 2-60 GB of framework code?&#xa;• Can you collect comprehensive examples?&#xa;• Is 70-95% framework behavior sufficient?&#xa;&#xa;Recommendation:&#xa;Start with 150M model (2.1 GB needed). Only pursue larger models if you have substantial framework ecosystems and can accept some generic behavior." tooltip="The reality check: you need significant amounts of YOUR framework data to create meaningful behavior change. The 150M model is most practical - you need 2.1 GB of your framework code (about 1 million files) for 90-95% framework behavior. Larger models require 11-60 GB of your data but still show some generic behavior. Critical questions: 1) Do you actually have this much framework code? 2) Can you systematically collect and organize it? 3) Is the behavior improvement worth the effort? 4) What&#39;s your current framework ecosystem size? Start small and scale up based on results and available data." id="reality-check">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;spacingTop=10;spacingBottom=10;" parent="1" vertex="1">
+                        <mxGeometry x="580" y="1750" width="500" height="340" as="geometry"/>
+                    </mxCell>
+                </object>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
