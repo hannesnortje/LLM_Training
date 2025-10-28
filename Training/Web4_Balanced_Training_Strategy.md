@@ -1524,12 +1524,182 @@ TOOL_EXAMPLE_METADATA = {
 }
 ```
 
+### Tool Orchestration Flow: RAG-First with Detection
+
+**Fundamental Question: How do tool-requiring prompts interact with RAG?**
+
+When a user prompt requires tool usage (e.g., "Read `Button.tsx` and check for constructor violations"), the system must:
+1. **Recognize** that a tool is needed
+2. **Generate** the correct tool call JSON
+3. **Use** the right tool syntax for the current IDE (Continue vs Cursor)
+
+**The Challenge for Small LLMs:**
+- Our 7B parameter model has only **1K generic tool awareness** samples trained
+- Cannot reliably learn 12K diverse tool patterns from 1K samples
+- Needs explicit examples at runtime to generate correct syntax
+
+**Solution: RAG-First with Fast Keyword Detection**
+
+#### Architecture Comparison
+
+| Approach | Flow | Pros | Cons |
+|----------|------|------|------|
+| **RAG-Always** | User Prompt → RAG Query → Context Injection → LLM → Response | Simple orchestration | Wastes 150ms on non-tool queries (70% of requests) |
+| **LLM-First** | User Prompt → LLM (attempt 1) → Detect Need → RAG → LLM (attempt 2) → Response | No wasted queries | Double LLM inference (~4 seconds), complex orchestration |
+| **Hybrid (Chosen)** | User Prompt → Keyword Detector (1ms) → [if tool] RAG Query (150ms) → LLM → Response | Fast non-tool queries, correct syntax | Requires keyword detector |
+
+#### Complete Orchestration Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ USER PROMPT: "Read Button.tsx and check for constructor violations" │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌────────────────────┐
+                    │ KEYWORD DETECTOR   │
+                    │ (~1ms, rule-based) │
+                    └────────┬───────────┘
+                             │
+                    Keywords: "Read", ".tsx"
+                    Tools: ["read_file", "grep"]
+                             │
+                             ▼
+                    ┌────────────────────┐
+                    │ RAG QUERY          │
+                    │ (~150ms)           │
+                    │                    │
+                    │ Collection: tool_examples
+                    │ Where: {
+                    │   tool_ecosystem: "continue",
+                    │   tool_name: ["read_file", "grep"]
+                    │ }
+                    │ N_results: 2-3
+                    └────────┬───────────┘
+                             │
+                  Retrieve 2-3 examples (~300 tokens)
+                             │
+                             ▼
+                    ┌────────────────────┐
+                    │ CONTEXT INJECTION  │
+                    │ (~5ms)             │
+                    └────────┬───────────┘
+                             │
+    ┌────────────────────────┴────────────────────────┐
+    │ AUGMENTED PROMPT:                               │
+    │                                                  │
+    │ System: You are a Web4 assistant with tools.    │
+    │                                                  │
+    │ [TOOL EXAMPLES FROM RAG - Continue Syntax]      │
+    │ Example 1:                                       │
+    │ <read_file>                                      │
+    │   <target_file>src/Example.tsx</target_file>    │
+    │ </read_file>                                     │
+    │                                                  │
+    │ Example 2:                                       │
+    │ <grep>                                           │
+    │   <pattern>constructor\(</pattern>              │
+    │   <path>src/</path>                             │
+    │ </grep>                                          │
+    │ [END TOOL EXAMPLES]                              │
+    │                                                  │
+    │ User: Read Button.tsx and check for constructor │
+    │       violations                                 │
+    └────────────────────┬───────────────────────────┘
+                         │
+                         ▼
+                ┌────────────────────┐
+                │ LLM INFERENCE      │
+                │ (~2000ms)          │
+                │                    │
+                │ Model sees examples│
+                │ Generates tool call│
+                │ with correct syntax│
+                └────────┬───────────┘
+                         │
+                         ▼
+                ┌────────────────────┐
+                │ TOOL EXECUTION     │
+                │ (~100ms)           │
+                │                    │
+                │ Execute: read_file │
+                │ Path: Button.tsx   │
+                └────────┬───────────┘
+                         │
+                         ▼
+                ┌────────────────────┐
+                │ RESPONSE TO USER   │
+                │                    │
+                │ File contents +    │
+                │ Constructor check  │
+                └────────────────────┘
+
+Total Latency: 1ms + 150ms + 2000ms + 100ms = ~2250ms
+```
+
+#### Fast Path for Non-Tool Queries
+
+```
+┌──────────────────────────────────────────┐
+│ USER PROMPT: "Explain empty constructor" │
+└────────────┬─────────────────────────────┘
+             │
+             ▼
+    ┌────────────────────┐
+    │ KEYWORD DETECTOR   │
+    │ (~1ms)             │
+    └────────┬───────────┘
+             │
+    No tool keywords detected
+             │
+             ▼
+    ┌────────────────────┐
+    │ LLM INFERENCE      │
+    │ (~2000ms)          │
+    │                    │
+    │ Answer from        │
+    │ trained knowledge  │
+    └────────┬───────────┘
+             │
+             ▼
+    ┌────────────────────┐
+    │ RESPONSE TO USER   │
+    │                    │
+    │ Explanation of     │
+    │ empty constructor  │
+    │ pattern            │
+    └────────────────────┘
+
+Total Latency: 1ms + 2000ms = ~2000ms (150ms saved, no RAG overhead)
+```
+
+#### Latency Analysis
+
+| Scenario | RAG-Always | Hybrid (Chosen) | Savings |
+|----------|-----------|-----------------|---------|
+| **Tool query** (30%) | 150ms RAG + 2000ms LLM = **2150ms** | 1ms detect + 150ms RAG + 2000ms LLM = **2151ms** | ~0ms |
+| **Non-tool query** (70%) | 150ms RAG + 2000ms LLM = **2150ms** | 1ms detect + 2000ms LLM = **2001ms** | **~150ms** |
+| **Weighted average** | **2150ms** | **(0.3 × 2151) + (0.7 × 2001) = 2046ms** | **~104ms avg** |
+
+**Key Benefits:**
+- ✅ **Fast non-tool queries** (70% of requests, minimal overhead)
+- ✅ **Correct tool syntax** (RAG examples guide small LLM)
+- ✅ **Swappable tool ecosystems** (change RAG filter, not retrain model)
+- ✅ **Predictable latency** (2250ms tool queries, 2000ms non-tool)
+
+**Why This Approach Works:**
+1. **Keyword detection is fast and reliable** (~1ms, 95%+ accuracy)
+2. **Small LLM needs examples** (can't learn 12K patterns from 1K samples)
+3. **RAG query is fast enough** (150ms acceptable for 30% of queries)
+4. **No wasted overhead** (70% of queries skip RAG entirely)
+
 ### Runtime Tool Injection Pattern
 
 ```python
 #!/usr/bin/env python3
 """
 Tool-Aware Prompt Augmentation
+Implements RAG-first-with-detection orchestration
 Injects relevant tool examples from RAG at runtime
 """
 
