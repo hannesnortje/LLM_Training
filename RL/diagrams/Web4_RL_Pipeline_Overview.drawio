@@ -1,0 +1,207 @@
+<mxfile host="65bd71144e">
+    <diagram name="RL Pipeline Overview" id="rl-pipeline">
+        <mxGraphModel dx="1502" dy="711" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="2200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="Web4 LoRA Reinforcement Learning Pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=32;fontStyle=1;fontColor=#1565C0;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="30" width="1300" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="subtitle" value="From Supervised Fine-Tuning to Production Deployment via Human &amp; AI Feedback" style="text;html=1;strokeColor=none;fillColor=#E3F2FD;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=16;fontStyle=2;fontColor=#0D47A1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="90" width="1300" height="35" as="geometry"/>
+                </mxCell>
+                <object label="🤖 PRE-TRAINED BASE MODEL&#xa;DeepSeek-Coder 6.7B&#xa;or Qwen2.5-Coder 7B&#xa;(Off-the-shelf, no Web4 knowledge yet)" tooltip="Pre-trained Base Model: The pipeline starts with an off-the-shelf pre-trained code generation model as the foundation. Two primary options: DeepSeek-Coder 6.7B (6.7 billion parameters, specialized for code) or Qwen2.5-Coder 7B (7 billion parameters, strong multilingual coding abilities). Both models feature 16K token context windows, support for 100+ programming languages, and state-of-the-art code completion abilities. The choice between them will be made in Stage 4 based on evaluation metrics. IMPORTANT: These are generic code models - they understand general programming concepts but have ZERO knowledge of Web4 framework patterns, tool-use schemas, or project-specific conventions. They cannot generate Web4 components, follow the 5-layer architecture, or use Web4 tools correctly. Stage 0 (SFT LoRA training from the Training folder) is what teaches them Web4-specific knowledge. Without Stage 0, these models would hallucinate incorrect tool calls, violate framework conventions, and generate unusable code for Web4 projects." id="base-model">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;strokeWidth=3;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                        <mxGeometry x="600" y="160" width="500" height="90" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-base-to-stage0" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#3F51B5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="base-model" target="stage0-box" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="300" as="sourcePoint"/>
+                        <mxPoint x="850" y="250" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="📘 STAGE 0: SFT LoRA (Baseline)&#xa;Web4 Core10Phase Training&#xa;&#xa;Input: 8,000 Web4 training examples&#xa;Output: SFT.lora adapter&#xa;Status: ✅ Complete (see Training folder)&#xa;&#xa;Hardware: M1 Max ✅ | Timeline: Done" tooltip="Stage 0: Supervised Fine-Tuning (SFT) establishes the Web4-aware baseline model. THIS IS THE WEB4 CORE10PHASE TRAINING from the Training folder (see Training/Web4_LoRA_Core10Phase.md for complete details). This stage trains a LoRA (Low-Rank Adaptation) adapter on 8,000 curated Web4-specific examples across three buckets: Tool-Core (teaching correct Web4 tool usage with valid JSON and schema - tools like read_file, write, search_replace, grep, codebase_search, etc.), Style-Core (demonstrating Web4 coding conventions: 5-layer OOP architecture, TypeScript strict mode, Vitest testing, PascalCase/camelCase naming, comprehensive documentation), and Guardrails (showing when to refuse unsafe or non-compliant requests using the REFUSAL pattern). This stage uses parameter-efficient fine-tuning via LoRA with r=16, alpha=32, dropout=0.05, targeting attention layers (q_proj, k_proj, v_proj, o_proj) and feed-forward layers (gate_proj, up_proj, down_proj). Training takes 12-20 hours on M1 Max hardware using 4-bit quantization, batch size 1 with gradient accumulation 16, and learning rate 3e-4 with cosine decay. Success criteria: JSON validity at least 97 percent, Schema compliance at least 95 percent, Lint pass at least 98 percent, Guardrail violations at most 2 percent. This baseline is CRITICAL - all subsequent RL stages (1-4) build upon this Web4 foundation. If SFT does not achieve targets, RL stages will not help. The SFT adapter teaches the model WHAT to do (correct Web4 tool patterns, framework conventions, component structure), while later RL stages refine HOW WELL it does them (precision, efficiency, safety, multi-step planning). See the complete 10-phase training plan, dataset strategy, and Web4 component examples in the Training folder." id="stage0-box">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;strokeWidth=4;fontSize=12;fontStyle=1;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;" parent="1" vertex="1">
+                        <mxGeometry x="550" y="290" width="600" height="150" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="📂 TRAINING FOLDER&#xa;&#xa;Web4_LoRA_Core10Phase&#xa;Dataset Strategy&#xa;Component Examples&#xa;&#xa;⬅ Complete SFT&#xa;Training Plan" tooltip="Training Folder Reference: Stage 0 (SFT LoRA) corresponds to the complete training plan documented in the Training folder. Key files: (1) Web4_LoRA_Core10Phase.md - The 10-phase progressive training strategy teaching Web4 patterns from basic tool-use through advanced component generation. (2) Web4_Component_Creation_Dataset_Strategy.md - Dataset architecture with 19,500 lines across Style-Core (77 percent), Style-Refactor (15 percent), Guardrails (5 percent), and Evaluation (3 percent) buckets. (3) Web4_FineTuning_Dataset_Examples_Expanded.md - Concrete training examples showing correct tool usage, Web4 architectural patterns, and guardrail refusals. (4) generate_web4_datasets.py - Dataset generation scripts. (5) data folder - JSONL training files (tool_core.jsonl, style_core.jsonl, guardrail.jsonl, eval.jsonl). The Training folder contains everything needed to execute Stage 0: dataset specifications, training hyperparameters, evaluation criteria, and quality gates. Once Stage 0 completes successfully (JSON validity at least 97 percent, schema compliance at least 95 percent), the resulting SFT.lora adapter becomes the baseline for RL stages 1-4 in this folder. The RL pipeline extends and refines the Web4 knowledge established by SFT training." id="training-folder-ref">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=3;fontSize=11;fontStyle=2;align=center;dashed=1;" vertex="1" parent="1">
+                        <mxGeometry x="80" y="290" width="180" height="150" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-training-to-stage0" value="See Training&#xa;folder for&#xa;complete plan" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#1976D2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;fontStyle=1;fontColor=#1976D2;dashed=1;" edge="1" parent="1" source="training-folder-ref" target="stage0-box">
+                    <mxGeometry x="0.1" y="10" width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="300" y="400" as="sourcePoint"/>
+                        <mxPoint x="350" y="350" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Metrics&#xa;Pass?" tooltip="Decision Point: After Stage 0 completion, evaluate the SFT baseline on the full eval set. Check: JSON validity at least 97 percent? Schema compliance at least 95 percent? Lint pass at least 98 percent? Guardrail violations at most 2 percent? If YES then Proceed to Stage 1 (ORPO). Model is ready for human preference optimization. If PLATEAU (close but not quite) then Iterate on SFT: add more training data, adjust hyperparameters, extend training epochs. If FAIL (metrics far from targets) then STOP and debug: analyze failure modes, review training data quality, check for data leakage, verify model loading correctly. Do NOT proceed to RL stages with a weak SFT baseline - RL amplifies existing capabilities but cannot fix fundamental failures." id="decision0">
+                    <mxCell style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#E65100;" parent="1" vertex="1">
+                        <mxGeometry x="730" y="460" width="140" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-decision0-pass" value="✅ PASS&#xa;Proceed" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#2E7D32;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;fontColor=#2E7D32;" parent="1" source="decision0" target="stage1-box" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="700" as="sourcePoint"/>
+                        <mxPoint x="850" y="650" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arrow-decision0-iterate" value="⚠️ ITERATE" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#F57C00;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;fontColor=#F57C00;dashed=1;" parent="1" source="decision0" target="stage0-box" edge="1">
+                    <mxGeometry x="-0.2" y="20" width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="600" y="700" as="sourcePoint"/>
+                        <mxPoint x="650" y="650" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="500" y="530"/>
+                            <mxPoint x="500" y="350"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="📝 STAGE 1: ORPO (Human Preferences)&#xa;&#xa;Input: 500-1,500 preference pairs&#xa;Output: ORPO.lora adapter&#xa;Feedback: 👤 Human annotators&#xa;&#xa;Hardware: M1 Max ✅ | Timeline: 2-3 weeks" tooltip="Stage 1: Odds Ratio Preference Optimization (ORPO) refines the SFT baseline using human feedback. Process: (1) Generate 3-5 outputs per prompt using SFT.lora with varying temperatures. (2) Human annotators compare outputs and choose the best based on: correct tool usage, valid JSON and schema, minimal plan (fewest steps), clean code style, proper guardrail behavior. (3) Build preference pairs: chosen versus rejected with reasons tagged. (4) Train ORPO adapter to prefer chosen over rejected using odds ratio loss function. ORPO is recommended over DPO because it is more stable, requires no separate reward model, and works well on M1 hardware. Annotation requires trained annotators following guidelines with inter-annotator agreement at least 0.7. Training: batch size 1, gradient accumulation 16, learning rate 5e-6, 3 epochs, 4-8 hours on M1. Success criteria versus SFT: JSON validity at least 99 percent (plus 2 percent), Schema compliance at least 97 percent (plus 2 percent), Lint pass 100 percent (plus 2 percent), Guardrail violations at most 1 percent (minus 1 percent), Human preference win-rate at least 65 percent. Stage 1 teaches the model to discriminate between good and great outputs, improving precision and style consistency beyond baseline SFT capabilities." id="stage1-box">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;strokeWidth=4;fontSize=13;fontStyle=1;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;" parent="1" vertex="1">
+                        <mxGeometry x="550" y="650" width="600" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="👤 HUMAN&#xa;FEEDBACK LOOP&#xa;&#xa;Annotators compare&#xa;outputs, tag issues,&#xa;build preference&#xa;dataset" tooltip="Human Feedback Loop: Stage 1 relies on human annotators to provide preference judgments. Annotators undergo 2-hour training program covering: evaluation criteria (correctness then efficiency then style), decision process (approximately 1 minute per comparison), edge case handling (both wrong, very similar, ambiguous prompts), and quality standards (agreement coefficient at least 0.7). The annotation interface presents prompts with multiple model outputs and collects: preference selection (A better, B better, or Tie), rejection reason tags (wrong tool, schema fail, verbose, style off, unsafe), and brief justification (1-2 sentences). Annotation effort: 500 pairs equals 8-10 hours, 1500 pairs equals 20-25 hours (can split across multiple annotators). Quality monitoring: 10 percent random overlap for agreement checking, tag distribution monitoring, annotation speed tracking. This human feedback is crucial - it teaches the model human preferences for code quality that cannot be captured by automated metrics alone." id="human-feedback-annotation">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#43A047;strokeWidth=2;fontSize=10;fontStyle=2;align=center;dashed=1;" parent="1" vertex="1">
+                        <mxGeometry x="80" y="650" width="140" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-human-to-stage1" value="Preference&#xa;Data" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#43A047;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;fontStyle=1;fontColor=#43A047;dashed=1;" parent="1" source="human-feedback-annotation" target="stage1-box" edge="1">
+                    <mxGeometry x="0.1" y="10" width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="300" y="800" as="sourcePoint"/>
+                        <mxPoint x="350" y="750" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Metrics&#xa;Pass?" tooltip="Decision Point: After Stage 1 ORPO training, evaluate on full eval set. Check: All Stage 0 metrics maintained or improved? JSON validity at least 99 percent? Schema compliance at least 97 percent? Lint pass 100 percent? Guardrail violations at most 1 percent? Human preference win-rate at least 65 percent on held-out test set? If YES then Proceed to Stage 2 (AWR). Model is ready for AI feedback optimization. If PLATEAU (metrics improved but not enough) then Can proceed to Stage 2 OR iterate on Stage 1 with more preference pairs. If REGRESS (any metric drops more than 3 percent versus SFT) then STOP and debug: check for overfitting (reduce epochs, add regularization), review preference data quality (are annotations consistent?), verify training hyperparameters (learning rate too high?), consider starting over from SFT checkpoint. Regression is serious - RL can destabilize models if not careful." id="decision1">
+                    <mxCell style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#E65100;" parent="1" vertex="1">
+                        <mxGeometry x="730" y="830" width="140" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-decision1-pass" value="✅ PASS" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#2E7D32;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;fontColor=#2E7D32;" parent="1" source="decision1" target="stage2-box" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="1050" as="sourcePoint"/>
+                        <mxPoint x="850" y="1000" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="⚙️ STAGE 2: AWR (AI Feedback)&#xa;&#xa;Input: 5,000-20,000 AI-scored samples&#xa;Output: AWR.lora adapter&#xa;Feedback: 🤖 Automated evaluators&#xa;&#xa;Hardware: M1 Max ✅ | Timeline: 1-2 weeks" tooltip="Stage 2: Advantage-Weighted Regression (AWR) scales up training using automated feedback instead of expensive human annotation. Process: Implement reward function with components: JSON valid plus 1.0, Schema pass plus 1.0, Tool success plus 1.0, Lint pass plus 1.0, AST correct plus 0.5, Guardrail violation minus 2.0, Verbosity penalty minus 0.1 per step, Off-policy penalty minus 0.5. Normalize to range 0 to 1. Generate 4-8 outputs per prompt using ORPO.lora from Stage 1. Score all outputs with reward function, log component breakdown. Select method: RS-SFT (keep top-1, continue SFT - simpler) or AWR (weight by advantage - more sophisticated). Train on high-reward samples with learning rate 3e-6 (lower than Stage 1), 2 epochs, 6-12 hours on M1. Success criteria versus Stage 1: JSON validity at least 99 percent (maintain), Schema at least 98 percent (plus 1 percent), Tool success at least 95 percent, Plan minimality improved 10-20 percent, No distribution collapse (vocab diversity at least 80 percent of baseline). Monitor for reward hacking: model exploiting reward function quirks. Add diversity bonus and cap reward components to prevent exploitation. Stage 2 teaches efficient, high-quality generation at scale beyond what human annotation can provide." id="stage2-box">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=4;fontSize=13;fontStyle=1;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;" parent="1" vertex="1">
+                        <mxGeometry x="550" y="1020" width="600" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="🤖 AI&#xa;FEEDBACK LOOP&#xa;&#xa;Automated validators&#xa;score outputs with&#xa;reward function" tooltip="AI Feedback Loop: Stage 2 uses automated evaluators to score model outputs at scale. Reward function components: JSON validator using Python json.loads (binary pass or fail), Schema validator using jsonschema library against tool schemas (checks required fields and types), Mock tool executor simulating tool behavior (checks if parameters would work), ESLint for generated code (style and lint compliance), AST parser for syntax correctness, Guardrail checker with keyword and pattern matching, Verbosity detector counting unnecessary steps, Off-policy detector comparing to expected sequences. Each component returns normalized score, final reward is weighted sum normalized to range 0 to 1. Logging captures all components for debugging. Reward function must be carefully designed to avoid exploitation - model finding edge cases that score high but are actually wrong. Prevention: multiple independent validators, human spot-checking of high-reward samples, diversity bonuses, component caps. This automated feedback enables training on 5000 to 20000 samples, teaching the model efficiency and quality patterns at scale." id="ai-feedback-annotation">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;strokeWidth=2;fontSize=10;fontStyle=2;align=center;dashed=1;" parent="1" vertex="1">
+                        <mxGeometry x="80" y="1020" width="140" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-ai-to-stage2" value="Reward&#xa;Scores" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#F9A825;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;fontStyle=1;fontColor=#F9A825;dashed=1;" parent="1" source="ai-feedback-annotation" target="stage2-box" edge="1">
+                    <mxGeometry x="0.1" y="10" width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="300" y="1150" as="sourcePoint"/>
+                        <mxPoint x="350" y="1100" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Metrics&#xa;Pass?" tooltip="Decision Point: After Stage 2 AWR training, evaluate comprehensively. Check: All Stage 1 metrics maintained? JSON at least 99 percent? Schema at least 98 percent? Tool success at least 95 percent? Plan minimality improved 10-20 percent? Distribution stable? If YES then Optionally proceed to Stage 3 (PPO) OR deploy Stage 2 (often sufficient). If PLATEAU (metrics good but not improving further) then Deploy Stage 2. Diminishing returns suggest stopping here. If REWARD HACKING detected then STOP, debug reward function: add semantic checks, tighten validators, cap component values, increase human spot-checking. Retrain after fixing. If DISTRIBUTION COLLAPSE then STOP, rollback to Stage 1, increase KL penalty or add diversity bonuses, retrain. Stage 3 is OPTIONAL - only pursue if: need complex multi-step planning, have compute budget (cloud GPU recommended), Stage 2 not sufficient for goals." id="decision2">
+                    <mxCell style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#E65100;" parent="1" vertex="1">
+                        <mxGeometry x="730" y="1200" width="140" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-decision2-optional" value="✅ PASS&#xa;(Optional)" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#D84315;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;fontColor=#D84315;dashed=1;" parent="1" source="decision2" target="stage3-box" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="1420" as="sourcePoint"/>
+                        <mxPoint x="850" y="1370" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arrow-decision2-deploy" value="🚀 DEPLOY&#xa;Stage 2" style="endArrow=classic;html=1;rounded=1;strokeWidth=3;strokeColor=#2E7D32;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;fontColor=#2E7D32;" parent="1" source="decision2" target="stage4-box" edge="1">
+                    <mxGeometry x="0.2" y="-20" width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="1000" y="1450" as="sourcePoint"/>
+                        <mxPoint x="1050" y="1400" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1320" y="1270"/>
+                            <mxPoint x="1320" y="1640"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="🎮 STAGE 3: PPO (Simulator) [OPTIONAL]&#xa;&#xa;Input: 10,000-50,000 episodes&#xa;Output: PPO.lora adapter&#xa;Feedback: 🎯 Simulator rewards&#xa;&#xa;Hardware: ⚠️ Cloud GPU ✅ | Timeline: 2-4 weeks" tooltip="Stage 3: Proximal Policy Optimization (PPO) teaches multi-step planning through simulated environment interaction. WARNING: COMPUTATIONALLY INTENSIVE - Cloud GPU (A100) highly recommended. M1 Max possible but takes 1-2 days versus 4-8 hours on cloud. Prerequisites: Functional simulator, Stage 1 or 2 adapter as policy init, SFT adapter as reference for KL penalty. Simulator components: Mock file system (in-memory), Tool registry (dispatchers for read file, write, grep, search, etc), Episode manager (task selection, lifecycle), Reward computer (task completion plus 10, correct tool plus 5, schema pass plus 2, style pass plus 1, wrong tool minus 3, schema fail minus 5, guardrail violation minus 10, step penalty minus 0.5, KL penalty). Training: Learning rate 1e-6 (very conservative), PPO epochs 4-8, clip range 0.2, KL coefficient 0.05, entropy coefficient 0.01, curriculum learning (simple to medium to hard tasks). Success criteria versus Stage 2: Episode success rate at least 75 percent, Multi-step plan accuracy plus 15-25 percent, All Stage 2 metrics maintained, KL divergence less than 0.15, Perplexity increase less than 10 percent. Skip Stage 3 if: use case does not need multi-step planning, Stage 2 metrics sufficient, compute budget limited, simulator too complex to implement." id="stage3-box">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCCBC;strokeColor=#D84315;strokeWidth=4;fontSize=13;fontStyle=1;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;" parent="1" vertex="1">
+                        <mxGeometry x="550" y="1390" width="600" height="160" as="geometry"/>
+                    </mxCell>
+                </object>
+                <object label="🎯 SIMULATOR&#xa;FEEDBACK LOOP&#xa;&#xa;Environment executes&#xa;actions, computes&#xa;rewards, learns via&#xa;trial-and-error" tooltip="Simulator Feedback Loop: Stage 3 uses a mock environment where the agent can safely practice multi-step tool sequences. Architecture: Environment Manager selects tasks, initializes state, manages episode lifecycle. Simulator Core contains mock file system (in-memory, deterministic), tool registry (dispatchers), state tracker, reward computer. Tool Implementations include read file, write, search replace, grep, glob file search, codebase search (mock), list dir, run terminal command (safe subset). Episode flow: reset then agent generates action then step(action) then parse JSON then validate schema then execute tool then compute reward then check done then return observation, reward, done, info. Reward function combines immediate rewards (correct tool, schema pass) with task completion bonus and KL penalty to prevent policy drift. Curriculum learning: Phase 1 simple single-tool tasks, Phase 2 2-3 step chains, Phase 3 complex multi-step plans. Task generator samples from difficulty distribution with procedural generation for variety. Deterministic behavior ensures reproducibility. Performance target: more than 10 episodes per second. This simulator enables the model to learn complex multi-step reasoning that cannot be captured by static examples alone." id="simulator-feedback-annotation">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;strokeWidth=2;fontSize=10;fontStyle=2;align=center;dashed=1;" parent="1" vertex="1">
+                        <mxGeometry x="80" y="1390" width="140" height="160" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-sim-to-stage3" value="Episode&#xa;Rewards" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;strokeColor=#C62828;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;fontStyle=1;fontColor=#C62828;dashed=1;" parent="1" source="simulator-feedback-annotation" target="stage3-box" edge="1">
+                    <mxGeometry x="0.1" y="10" width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="300" y="1550" as="sourcePoint"/>
+                        <mxPoint x="350" y="1500" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="Metrics&#xa;Pass?" tooltip="Decision Point: After Stage 3 PPO training, evaluate rigorously. Check: Episode success rate at least 75 percent? Multi-step plan accuracy improved 15-25 percent? All Stage 2 metrics maintained? KL divergence from SFT less than 0.15? Perplexity increase less than 10 percent? Policy entropy more than 2.0? If YES then Proceed to Stage 4 deployment. Model has mastered complex multi-step planning. If PLATEAU (success rate 60-75 percent) then Accept and proceed OR iterate with more episodes or better curriculum. If KL DIVERGENCE more than 0.2 then Policy drifting too far from reference. STOP, increase KL penalty coefficient from 0.05 to 0.1, restart training from earlier checkpoint. If CATASTROPHIC FORGETTING then STOP, rollback to Stage 2. PPO was too aggressive. Consider: reducing learning rate 10 times, increasing KL penalty 2 times, adding SFT regularization, using GRPO instead of PPO (more stable group-relative variant). If POLICY COLLAPSE (entropy less than 1.0, repetitive outputs) then STOP, add entropy bonus coefficient, reduce clip range, restart from checkpoint. Stage 3 is highest risk stage - careful monitoring essential." id="decision3">
+                    <mxCell style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#E65100;" parent="1" vertex="1">
+                        <mxGeometry x="730" y="1590" width="140" height="140" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-decision3-pass" value="✅ PASS" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#2E7D32;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;fontColor=#2E7D32;" parent="1" source="decision3" target="stage4-box" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="1850" as="sourcePoint"/>
+                        <mxPoint x="850" y="1800" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="🚀 STAGE 4: Evaluation &amp; Deployment&#xa;&#xa;Input: All adapters (SFT, ORPO, AWR, PPO)&#xa;Output: Web4_PROD.lora&#xa;Process: Compare → Select → Deploy&#xa;&#xa;Hardware: Any | Timeline: 1 week" tooltip="Stage 4: Final evaluation, adapter selection, and production deployment. Process: Comprehensive Evaluation - Run ALL adapters on full 2000-sample eval set. Track: JSON validity, schema compliance, lint pass, tool success rate, plan minimality, code quality, guardrail compliance, language quality, diversity. Human Evaluation - 100 random samples, preference ranking across all adapters, overall quality scores (1-5 scale, target mean at least 4.0), bug detection (target rate at most 5 percent). Adapter Selection - Compare all metrics, analyze trade-offs. Select best overall OR consider merging: sequential loading (stack adapters), parameter averaging (interpolate weights), task routing (different adapters for different tasks). Production Prep - Export to deployment format, create model card with training details and limitations, set up monitoring (JSON validity, tool success, distribution shift), package with inference code. Rollout - Phase 1: Shadow mode (1-2 weeks, run alongside baseline, log comparisons), Phase 2: A/B test (2-4 weeks, 50/50 split, track metrics), Phase 3: Full rollout (gradual ramp to 100 percent, monitor closely). Deployment checklist: All eval gates pass? Human spot-check approved? Inference speed acceptable? Memory footprint acceptable? Model card complete? Rollback procedure tested? Always keep SFT.lora as emergency fallback. Success: Production-ready model serving real users with measurable improvements over baseline." id="stage4-box">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#6A1B9A;strokeWidth=4;fontSize=13;fontStyle=1;align=left;verticalAlign=top;spacingLeft=15;spacingTop=15;" parent="1" vertex="1">
+                        <mxGeometry x="550" y="1780" width="600" height="160" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="arrow-to-production" value="PRODUCTION&#xa;DEPLOYMENT" style="endArrow=classic;html=1;rounded=0;strokeWidth=4;strokeColor=#6A1B9A;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=13;fontStyle=1;fontColor=#6A1B9A;" parent="1" source="stage4-box" target="production-box" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="2050" as="sourcePoint"/>
+                        <mxPoint x="850" y="2000" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <object label="✨ PRODUCTION MODEL ✨&#xa;&#xa;Web4_PROD.lora serving real users&#xa;Monitoring: JSON validity, tool success, drift detection&#xa;Rollback ready: SFT.lora emergency fallback" tooltip="Production Deployment: Final model is now serving real Web4 developers in production environments. The selected adapter has passed all quality gates and is integrated into the Web4 development workflow. Continuous monitoring tracks: JSON validity rate (should maintain at least 99 percent), tool success rate (at least 95 percent), request latency (less than 2 seconds per tool call), memory usage (less than 10GB), error rate (at most 1 percent), user feedback scores. Distribution shift detection runs weekly: compare production outputs versus eval set baseline using KL divergence, vocab diversity, n-gram patterns, perplexity. Alert if KL more than 0.3 or diversity less than 70 percent of baseline. Rollback plan: If production metrics degrade more than 5 percent or critical bugs discovered, immediately revert to SFT.lora baseline (always kept available), investigate root cause, fix issues in staging environment, re-deploy after validation. Post-deployment improvement: Collect edge cases from production, add to training data for next iteration, periodic retraining (quarterly) with updated data, A/B test improvements before full rollout. Success metrics: User satisfaction scores, time saved versus manual coding, code quality (human review), adoption rate, bug and incident rate. The production model represents the culmination of the entire RL pipeline." id="production-box">
+                    <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#8E24AA;strokeWidth=5;fontSize=14;fontStyle=1;align=center;" parent="1" vertex="1">
+                        <mxGeometry x="600" y="1990" width="500" height="100" as="geometry"/>
+                    </mxCell>
+                </object>
+                <mxCell id="summary-footer" value="🎯 KEY TAKEAWAYS: Stage 0 (SFT) establishes baseline • Stage 1 (ORPO) adds human preferences • Stage 2 (AWR) scales with AI feedback • Stage 3 (PPO) optional for multi-step planning • Stage 4 selects best and deploys • Independent stages: can stop after any stage if metrics meet goals • Always maintain rollback capability" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=3;align=center;verticalAlign=middle;fontSize=12;fontStyle=2" parent="1" vertex="1">
+                    <mxGeometry x="150" y="2120" width="1400" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-title" value="LEGEND" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#424242;" parent="1" vertex="1">
+                    <mxGeometry x="1350" y="160" width="300" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-sft" value="Stage 0: SFT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;strokeWidth=2;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1350" y="200" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-orpo" value="Stage 1: ORPO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;strokeWidth=2;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1510" y="200" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-awr" value="Stage 2: AWR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1350" y="240" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-ppo" value="Stage 3: PPO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCCBC;strokeColor=#D84315;strokeWidth=2;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1510" y="240" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-deploy" value="Stage 4: Deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#6A1B9A;strokeWidth=2;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1350" y="280" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-decision" value="Decision Point" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;strokeWidth=2;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1510" y="275" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-m1" value="M1 Max ✅ Feasible" style="text;html=1;strokeColor=#2E7D32;fillColor=#C8E6C9;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1350" y="330" width="140" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-cloud" value="Cloud GPU ✅ Recommended" style="text;html=1;strokeColor=#D84315;fillColor=#FFCCBC;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1510" y="330" width="140" height="25" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
