@@ -11,7 +11,7 @@
 
 **Version History**:
 - v2.1 (2025-10-28): Added hybrid tool architecture - 1K generic tool awareness in LoRA, 12K IDE-specific examples in RAG for swappability
-- v2.0 (2025-10-27): RAG-first training pipeline, three-tier RAG architecture (ChromaDB + Redis Graph + SQLite)
+- v2.0 (2025-10-27): RAG-driven sample generation, three-tier RAG architecture (ChromaDB + Redis Graph + SQLite), Training-First production architecture
 - v1.0 (2025-10-26): Initial balanced strategy (train patterns, reference history)
 
 ---
@@ -54,10 +54,11 @@
 
 1. [Executive Summary](#executive-summary)
 2. [The Balanced Philosophy](#the-balanced-philosophy)
-3. [What Gets Trained vs RAG'd](#what-gets-trained-vs-ragd)
-4. [RAG-First Training Pipeline](#rag-first-training-pipeline)
-5. [Tool Architecture: Hybrid RAG-Based Injection](#tool-architecture-hybrid-rag-based-injection)
-6. [Dataset Composition](#dataset-composition-37000-trained-samples--12000-rag-tool-samples)
+3. [Knowledge Hierarchy: Training-First Production Architecture](#knowledge-hierarchy-training-first-production-architecture)
+4. [What Gets Trained vs RAG'd](#what-gets-trained-vs-ragd)
+5. [RAG-Driven Sample Generation (Training Preparation Phase)](#rag-driven-sample-generation-training-preparation-phase)
+6. [Tool Architecture: Hybrid RAG-Based Injection](#tool-architecture-hybrid-rag-based-injection)
+7. [Dataset Composition](#dataset-composition-37000-trained-samples--12000-rag-tool-samples)
 7. [RAG Architecture](#rag-architecture)
 8. [Data Governance & Safety](#data-governance--safety)
 9. [Extraction Strategy](#extraction-strategy)
@@ -193,6 +194,189 @@
 | **Inference Speed** | ⚠️ Slow (large model) | ✅ Fast | ✅ Fast |
 | **Domain Expertise** | ✅ Deep | ❌ Shallow | ✅ Deep |
 | **Maintenance** | ❌ Retrain everything | ✅ Add to RAG | ✅ Train patterns, reference history |
+
+---
+
+## Knowledge Hierarchy: Training-First Production Architecture
+
+### The Reality: NOT "RAG-First" in Production
+
+**Critical Clarification**: While the training pipeline uses RAG to *generate* training samples, the **production architecture is Training-First**. The model uses its trained knowledge (95% of capability) as the primary source, with RAG serving as a **reference library** for specific use cases.
+
+### Three-Tier Knowledge Hierarchy
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ TIER 1: TRAINED KNOWLEDGE (Primary, Always Active)               │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
+│                                                                   │
+│ What: Web4 Philosophy, Patterns, Methodology (37K samples)       │
+│ Usage: 80-90% of production queries                              │
+│ Latency: ~2000ms (LLM inference only)                            │
+│                                                                   │
+│ Trained Content:                                                 │
+│ ✓ Empty Constructor Pattern                                      │
+│ ✓ 5-Layer Architecture                                           │
+│ ✓ Radical OOP Principles                                         │
+│ ✓ PDCA Methodology (structure, TRON format)                      │
+│ ✓ CMM Framework (CMM1-4 progression)                             │
+│ ✓ Dual Link Format                                               │
+│ ✓ Code Refactoring Patterns                                      │
+│ ✓ Generic Tool Awareness (concept of tools)                      │
+│ ✓ Guardrails (Jest ban, manual operations)                       │
+│                                                                   │
+│ Example Queries (No RAG Needed):                                 │
+│ • "Explain empty constructor pattern"                            │
+│ • "Generate a Layer 2 component following Web4 conventions"      │
+│ • "What is TRON format?"                                          │
+│ • "Show me scenario-based state management"                       │
+│ • "How do I structure a PDCA?"                                    │
+│                                                                   │
+│ Why Trained: These are PATTERNS and PHILOSOPHY that apply        │
+│              universally. The model must know them deeply         │
+│              for fast, consistent generation.                     │
+└──────────────────────────────────────────────────────────────────┘
+                              ↓
+                    Model CAN'T answer?
+                    Need specific history?
+                              ↓
+┌──────────────────────────────────────────────────────────────────┐
+│ TIER 2: RAG HISTORICAL REFERENCE (Secondary, 10-20% of queries) │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
+│                                                                   │
+│ What: Specific Past Events (534 PDCAs, ~2,670 chunks)            │
+│ Usage: 10-20% of production queries                              │
+│ Latency: +300ms (RAG query + context injection)                  │
+│                                                                   │
+│ RAG Content:                                                      │
+│ ✓ Complete PDCA documents (all 534)                              │
+│ ✓ Session-specific decisions                                     │
+│ ✓ Agent-specific work history                                    │
+│ ✓ Date-specific activities                                       │
+│ ✓ Problem-solution pairs from real work                          │
+│ ✓ Breadcrumb chains (context via graph)                          │
+│                                                                   │
+│ Example Queries (RAG Needed):                                    │
+│ • "How did we solve the component versioning conflict in Oct?"   │
+│ • "What did SaveRestartAgent work on 2025-10-15?"                │
+│ • "Show me the PDCA where we debugged the CMM3 violation"        │
+│ • "What was our approach to integrating the new tool?"           │
+│ • "Find similar debugging approaches from Q3 2024"               │
+│                                                                   │
+│ Why RAG: These are SPECIFIC HISTORICAL FACTS that the model      │
+│          cannot memorize. RAG provides on-demand lookup with      │
+│          source citations.                                        │
+└──────────────────────────────────────────────────────────────────┘
+                              ↓
+                      Tool usage needed?
+                              ↓
+┌──────────────────────────────────────────────────────────────────┐
+│ TIER 3: RAG TOOL REPOSITORY (Tertiary, 30% of queries)          │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
+│                                                                   │
+│ What: IDE-Specific Tool Syntax (12K tool examples)               │
+│ Usage: 30% of production queries (tool-requiring)                │
+│ Latency: +150ms (RAG query + context injection)                  │
+│                                                                   │
+│ RAG Content:                                                      │
+│ ✓ Continue tool examples (10K + 2K negatives)                    │
+│ ✓ Cursor tool examples (swappable)                               │
+│ ✓ Custom tool examples (extensible)                              │
+│ ✓ Tool call syntax (XML/JSON)                                    │
+│ ✓ Parameter patterns                                             │
+│ ✓ Usage contexts (TypeScript, Python, etc.)                      │
+│                                                                   │
+│ Example Queries (Tool RAG Needed):                               │
+│ • "Read Button.tsx"                                               │
+│ • "Search for constructor patterns in src/"                       │
+│ • "Run npm install"                                               │
+│ • "List files in components/"                                     │
+│                                                                   │
+│ Why RAG: IDE syntax is SWAPPABLE. Training 12K samples would     │
+│          lock us to one IDE. RAG enables 5-minute IDE switching   │
+│          vs 10-14 hour retraining.                                │
+│                                                                   │
+│ Note: Model KNOWS to use tools (1K trained), RAG provides        │
+│       SYNTAX for current IDE.                                     │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Production Query Decision Tree
+
+```python
+def handle_query(user_query: str) -> Response:
+    """
+    Training-First architecture with RAG reference.
+    """
+    # ALWAYS start with trained knowledge
+    llm_context = build_base_context()  # Web4 patterns, PDCA methodology, etc.
+    
+    # Step 1: Check if tools needed (30% of queries)
+    if keyword_detector.needs_tools(user_query):  # 1ms
+        # Query RAG for tool syntax
+        tool_examples = rag.query_tools(user_query)  # 150ms
+        llm_context.inject_tools(tool_examples)
+    
+    # Step 2: Check if historical reference needed (10-20% of queries)
+    if requires_specific_history(user_query):  # Pattern: "how did we...", "show me PDCA..."
+        # Query RAG for historical context
+        historical_pdcas = rag.query_history(user_query)  # 300ms
+        llm_context.inject_history(historical_pdcas)
+    
+    # Step 3: LLM generates response using:
+    #   - PRIMARY: Trained knowledge (always)
+    #   - SECONDARY: RAG history (if needed)
+    #   - TERTIARY: RAG tools (if needed)
+    response = llm.generate(llm_context)  # 2000ms
+    
+    return response
+```
+
+### Latency Breakdown by Query Type
+
+| Query Type | Trained | RAG Historical | RAG Tools | Total Latency | Frequency |
+|------------|---------|----------------|-----------|---------------|-----------|
+| **Pure Trained** | 2000ms | - | - | **2000ms** | 50-60% |
+| **Trained + Tools** | 2000ms | - | +150ms | **2150ms** | 20-30% |
+| **Trained + History** | 2000ms | +300ms | - | **2300ms** | 10-15% |
+| **Trained + Both** | 2000ms | +300ms | +150ms | **2450ms** | 5-10% |
+
+**Weighted Average**: ~2100ms (optimal balance)
+
+### Key Insights
+
+1. **Training is Primary**: The model ALWAYS uses its 37K trained samples (95% of capability). This is the foundation.
+
+2. **RAG is Reference**: RAG provides two types of supplementary data:
+   - **Historical**: "What specific event happened?" (10-20% of queries)
+   - **Tooling**: "What syntax does Continue use?" (30% of queries)
+
+3. **No False Dichotomy**: It's not "RAG vs Training" but "Training + RAG Reference". The model uses both simultaneously:
+   - Trained knowledge for patterns and methodology
+   - RAG for specific historical facts
+   - RAG for swappable tool syntax
+
+4. **Terminology Clarity**:
+   - ❌ "RAG-First Training Pipeline" (misleading for production)
+   - ✅ "RAG-Driven Sample Generation" (accurate for training prep)
+   - ✅ "Training-First Production Architecture" (accurate for runtime)
+
+### Why This Architecture Works
+
+**For Users:**
+- Fast responses (80-90% under 2000ms)
+- Accurate history when needed (+300ms acceptable)
+- Correct tool syntax (+150ms acceptable)
+
+**For Developers:**
+- Clear separation of concerns (trained vs retrieved)
+- Swappable tooling (5-min vs 10-14hr)
+- Continuous improvement (evening loop)
+
+**For Maintainability:**
+- Patterns in training (stable, versioned)
+- History in RAG (growing, searchable)
+- Tools in RAG (swappable, extensible)
 
 ---
 
@@ -525,11 +709,13 @@ RAG_DAILY_BUFFER = {
 
 ---
 
-## RAG-First Training Pipeline
+## RAG-Driven Sample Generation (Training Preparation Phase)
 
-### Philosophy: RAG as Single Source of Truth
+### Philosophy: RAG as Training Data Source
 
-The Web4 training pipeline uses a **RAG-first approach** where the three-tier vector database serves as the canonical data store for all training data extraction. This creates a unified, intelligent pipeline from raw data to trained adapter.
+The Web4 training pipeline uses **RAG-driven sample generation** where the three-tier vector database serves as the canonical data store for extracting training samples. This creates a unified, intelligent pipeline from raw data to training datasets.
+
+**Critical Note**: This "RAG-first" terminology applies **only to the training preparation phase** (Week 1-2). In production, the architecture is **Training-First** with RAG as a reference library (see [Knowledge Hierarchy](#knowledge-hierarchy-training-first-production-architecture)).
 
 ### Complete Pipeline Flow
 
@@ -5089,7 +5275,7 @@ RESPONSE WITH CONTEXT
 
 **Document Version**: 2.1 (Hybrid Tool Architecture)  
 **Last Updated**: 2025-10-28  
-**Approach**: RAG-first balanced hybrid (RAG as single source of truth, train patterns, reference history, swappable tools)  
+**Approach**: Training-First production architecture (RAG-driven sample generation for training prep, train patterns, reference history, swappable tools)  
 **Target**: Mac M1 32GB (37K samples from RAG queries, ~20M tokens, all 534 PDCAs in persistent RAG + 12K swappable tool examples)  
 **Key Innovation**: Three-tier RAG (ChromaDB + Redis Graph + SQLite) → Intelligent sampling → LoRA training → Hybrid tool architecture (1K trained + 12K RAG) → Mark as trained → Evening loop consistency
 
